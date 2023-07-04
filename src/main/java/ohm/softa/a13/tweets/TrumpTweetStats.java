@@ -21,11 +21,12 @@ public class TrumpTweetStats {
 
     public static Map<String, Integer> calculateWordCount(Stream<Tweet> tweetStream, List<String> stopWords) {
         return tweetStream
+			//.parallel()
 			.map(Tweet::getText)
-			.map(line -> line.split("()+"))
+			.map(line -> line.split("( )+"))
 			.flatMap(Arrays::stream)
 			.map(String::toLowerCase)
-			.filter(stopWords::contains)
+			.filter(word -> !stopWords.contains(word))
 			.reduce(new HashMap<String, Integer>(), (acc, word) ->{
 				if(acc.containsKey(word)){
 					acc.put(word, acc.get(word)+1);
@@ -34,10 +35,11 @@ public class TrumpTweetStats {
 					acc.put(word, 1);
 				}
 				return acc;
-			}, (m1, m2) -> m1)
+			}, (m1, m2) -> m2)
 			.entrySet()
 			.stream()
-			.filter(e -> e.getValue()<10)
+			.filter(e -> e.getValue()>=10)
 			.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
     }
 }
